@@ -2,13 +2,13 @@
 class Parser(private val tokens: List<Token>) {
 
     private val instructionTokens = getInstructionTokens().toMutableList()
-
+    private val instructions = mutableListOf<Instruction>()
 
     private fun peek() = instructionTokens.firstOrNull()
     private fun next() = instructionTokens.removeFirstOrNull()
 
     fun parse(): List<Instruction> {
-        val instructions = mutableListOf<Instruction>()
+        instructions.clear()
         while (instructionTokens.isNotEmpty()) {
             val instruction = parseInstruction()
             instructions.add(instruction)
@@ -16,6 +16,7 @@ class Parser(private val tokens: List<Token>) {
 
         return instructions
     }
+
 
     private fun parseInstruction(): Instruction {
         val instructionToken = peek()!!

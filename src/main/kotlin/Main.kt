@@ -7,4 +7,5 @@ fun main () {
     val parser = Parser(tokens)
     val instructions = parser.parse()
     println(instructions)
+    println("%05d".format(16.toString(2).toInt()))
 }

@@ -127,8 +127,8 @@ val SIMPLE_RTYPE = mapOf(
 )
 
 val MULDIV_RTYPE = mapOf(
-    "mult" to 0x24,
-    "multu" to 0x25,
+    "mult" to 0x18,
+    "multu" to 0x19,
     "div" to 0x1a,
     "divu" to 0x1b
 )
