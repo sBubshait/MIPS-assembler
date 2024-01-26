@@ -8,3 +8,5 @@ hello:  .asciiz 3	# A Null terminated string
 main:
 	add $t0, $zero, $zero	# $t0 = 0
 	nor $t1, $t0, $t0		# $t1 = ~$t0
+	mult $t0, $t1			# $t0 = $t0 * $t1
+	sll $s0, $s1, 2

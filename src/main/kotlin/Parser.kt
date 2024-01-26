@@ -28,27 +28,51 @@ class Parser(private val tokens: List<Token>) {
         val instructionName = instructionToken.value
         val instructionType = INSTRUCTIONS[instructionName] ?: throwErr("Invalid instruction $instructionName")
 
-        when (instructionType) {
-            INSTRUCTION_TYPE.R_TYPE -> return parseRTypeInstruction()
-            INSTRUCTION_TYPE.I_TYPE -> return parseITypeInstruction()
-            INSTRUCTION_TYPE.J_TYPE -> return parseJTypeInstruction()
+        return when (instructionType) {
+            INSTRUCTION_TYPE.R_TYPE -> parseRTypeInstruction()
+            INSTRUCTION_TYPE.I_TYPE -> parseITypeInstruction()
+            INSTRUCTION_TYPE.J_TYPE -> parseJTypeInstruction()
         }
     }
 
     private fun parseRTypeInstruction(): Instruction {
-        val instructionName = next()!!.value
-        if (instructionName in SIMPLE_RTYPE_NAMES) {
-            assert(peek() != null && peek()!!.type == TokenType.REGISTER) { "Expected register, got ${peek()!!.value}" }
-            val rd = REGISTERS[next()!!.value] ?: throwErr("Invalid register name: ${next()!!.value}")
-            assert(peek() != null && next()!!.type == TokenType.COMMA) { "Expected comma, got ${peek()!!.value}" }
-            assert(peek() != null && peek()!!.type == TokenType.REGISTER) { "Expected register, got ${peek()!!.value}" }
-            val rs = REGISTERS[next()!!.value] ?: throwErr("Invalid register name: ${next()!!.value}")
-            assert(peek() != null && next()!!.type == TokenType.COMMA) { "Expected comma, got ${peek()!!.value}" }
-            assert(peek() != null && peek()!!.type == TokenType.REGISTER) { "Expected register, got ${peek()!!.value}" }
-            val rt = REGISTERS[next()!!.value] ?: throwErr("Invalid register name: ${next()!!.value}")
-            return RTypeInstruction(0, rs, rt, rd, 0, SIMPLE_RTYPE[instructionName]!!)
+        val instructionName = peek()!!.value
+        return when (instructionName) {
+            in SIMPLE_RTYPE_NAMES -> parseSimpleRTypeInstruction()
+            in MULDIV_RTYPE_NAMES  -> parseMulDivRTypeInstruction()
+            in SHIFT_RTYPE_NAMES ->  parseShiftRTypeInstruction()
+            else -> throwErr("Invalid instruction $instructionName")
         }
-        return RTypeInstruction(0, 0, 0, 0, 0, 0)
+    }
+
+    private fun parseSimpleRTypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rd = getRegister()
+        skipComma()
+        val rs = getRegister()
+        skipComma()
+        val rt = getRegister()
+        return RTypeInstruction(0, rs, rt, rd, 0, SIMPLE_RTYPE[instructionName]!!)
+    }
+
+    private fun parseMulDivRTypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rs = getRegister()
+        skipComma()
+        val rt = getRegister()
+        // NOTE: rd is not used (dont care) so we just set it arbitrarily to 0 (although possibly not the most efficient)
+        return RTypeInstruction(0, rs, rt, 0, 0, MULDIV_RTYPE[instructionName]!!)
+    }
+
+    private fun parseShiftRTypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rd = getRegister()
+        skipComma()
+        val rt = getRegister()
+        skipComma()
+        val shamt = getInteger()
+        // NOTE: Similarly, rs is arbitrarily chosen to be 0.
+        return RTypeInstruction(0, 0, rt, rd, shamt, SHIFT_RTYPE[instructionName]!!)
     }
 
     private fun parseITypeInstruction(): Instruction {
@@ -57,6 +81,22 @@ class Parser(private val tokens: List<Token>) {
 
     private fun parseJTypeInstruction(): Instruction {
         return RTypeInstruction(0, 0, 0, 0, 0, 0)
+    }
+
+    private fun getRegister(): Int {
+        kotlin.assert(peek() != null && peek()!!.type == TokenType.REGISTER) { "Expected register, got ${peek()!!.value}" }
+        val name = next()!!.value
+        return REGISTERS[name] ?: throwErr("Invalid register name: $name")
+    }
+
+    private fun getInteger(): Int {
+        kotlin.assert(peek() != null && peek()!!.type == TokenType.NUMBER) { "Expected integer, got ${peek()!!.value}" }
+        val value = next()!!.value
+        return value.toIntOrNull() ?: throwErr("Invalid integer: $value")
+    }
+
+    private fun skipComma() {
+        kotlin.assert(peek() != null && next()!!.type == TokenType.COMMA) { "Expected comma, got ${peek()!!.value}" }
     }
 
     private fun getInstructionTokens(): List<Token> {

@@ -84,6 +84,8 @@ val INSTRUCTIONS: Map<String, INSTRUCTION_TYPE> = mapOf(
     "lui" to INSTRUCTION_TYPE.I_TYPE,
     "lw" to INSTRUCTION_TYPE.I_TYPE,
     "mul" to INSTRUCTION_TYPE.R_TYPE,
+    "mult" to INSTRUCTION_TYPE.R_TYPE,
+    "multu" to INSTRUCTION_TYPE.R_TYPE,
     "nor" to INSTRUCTION_TYPE.R_TYPE,
     "or" to INSTRUCTION_TYPE.R_TYPE,
     "ori" to INSTRUCTION_TYPE.I_TYPE,
@@ -114,7 +116,26 @@ val SIMPLE_RTYPE = mapOf(
     "nor" to 0x27,
     "slt" to 0x2a,
     "sltu" to 0x2b,
+    "sllv" to 0x04,
+    "srlv" to 0x06,
+    "srav" to 0x07,
 )
+
+val MULDIV_RTYPE = mapOf(
+    "mult" to 0x24,
+    "multu" to 0x25,
+    "div" to 0x1a,
+    "divu" to 0x1b
+)
+val MULDIV_RTYPE_NAMES = MULDIV_RTYPE.keys.toList()
+
+val SHIFT_RTYPE = mapOf(
+    "sll" to 0x00,
+    "srl" to 0x02,
+    "sra" to 0x03
+)
+val SHIFT_RTYPE_NAMES = SHIFT_RTYPE.keys.toList()
+
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
 
 val INSTRUCTION_NAMES = INSTRUCTIONS.keys.toList()
@@ -171,6 +192,7 @@ class JTypeInstruction(
                 "%026d".format(address.toString(2).toInt())
     }
 }
+
 
 fun assert(cond: Boolean, msg: () -> String) {
     if (!cond) {

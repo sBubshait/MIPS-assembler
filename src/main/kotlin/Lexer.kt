@@ -90,7 +90,7 @@ class Lexer (private val input: String) {
                 break
             }
             assert(next.isLetterOrDigit(), { "Invalid character $next" })
-            word.append(next)
+            word.append(next.lowercase())
             nextChar()
         }
         return word.toString()
