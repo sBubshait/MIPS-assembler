@@ -10,3 +10,5 @@ main:
 	nor $t1, $t0, $t0		# $t1 = ~$t0
 	mult $t0, $t1			# $t0 = $t0 * $t1
 	sll $s0, $s1, 2
+	jr $s0
+	MFHI $t0

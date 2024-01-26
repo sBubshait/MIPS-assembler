@@ -77,6 +77,7 @@ val INSTRUCTIONS: Map<String, INSTRUCTION_TYPE> = mapOf(
     "j" to INSTRUCTION_TYPE.J_TYPE,
     "jal" to INSTRUCTION_TYPE.J_TYPE,
     "jr" to INSTRUCTION_TYPE.R_TYPE,
+    "jalr" to INSTRUCTION_TYPE.R_TYPE,
     "lb" to INSTRUCTION_TYPE.I_TYPE,
     "lbu" to INSTRUCTION_TYPE.I_TYPE,
     "lh" to INSTRUCTION_TYPE.I_TYPE,
@@ -86,6 +87,10 @@ val INSTRUCTIONS: Map<String, INSTRUCTION_TYPE> = mapOf(
     "mul" to INSTRUCTION_TYPE.R_TYPE,
     "mult" to INSTRUCTION_TYPE.R_TYPE,
     "multu" to INSTRUCTION_TYPE.R_TYPE,
+    "mfhi" to INSTRUCTION_TYPE.R_TYPE,
+    "mflo" to INSTRUCTION_TYPE.R_TYPE,
+    "mthi" to INSTRUCTION_TYPE.R_TYPE,
+    "mtlo" to INSTRUCTION_TYPE.R_TYPE,
     "nor" to INSTRUCTION_TYPE.R_TYPE,
     "or" to INSTRUCTION_TYPE.R_TYPE,
     "ori" to INSTRUCTION_TYPE.I_TYPE,
@@ -135,6 +140,24 @@ val SHIFT_RTYPE = mapOf(
     "sra" to 0x03
 )
 val SHIFT_RTYPE_NAMES = SHIFT_RTYPE.keys.toList()
+
+val OTHER_RTYPE = mapOf(
+    "jr"   to 0x08,
+    "jalr" to 0x09,
+    "mfhi" to 0x10,
+    "mthi" to 0x11,
+    "mflo" to 0x12,
+    "mtlo" to 0x13
+)
+val OTHER_RTYPE_NAMES = OTHER_RTYPE.keys.toList()
+val OTHER_RTYPE_POS = mapOf(
+    "jr"   to 1,
+    "jalr" to 1,
+    "mfhi" to 3,
+    "mthi" to 1,
+    "mflo" to 3,
+    "mtlo" to 1
+)
 
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
 

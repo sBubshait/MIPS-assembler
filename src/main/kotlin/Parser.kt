@@ -41,6 +41,7 @@ class Parser(private val tokens: List<Token>) {
             in SIMPLE_RTYPE_NAMES -> parseSimpleRTypeInstruction()
             in MULDIV_RTYPE_NAMES  -> parseMulDivRTypeInstruction()
             in SHIFT_RTYPE_NAMES ->  parseShiftRTypeInstruction()
+            in OTHER_RTYPE_NAMES -> parseOtherRTypeInstruction()
             else -> throwErr("Invalid instruction $instructionName")
         }
     }
@@ -60,7 +61,7 @@ class Parser(private val tokens: List<Token>) {
         val rs = getRegister()
         skipComma()
         val rt = getRegister()
-        // NOTE: rd is not used (dont care) so we just set it arbitrarily to 0 (although possibly not the most efficient)
+        // NOTE: rd is not used (dont care) so we just pass 0.
         return RTypeInstruction(0, rs, rt, 0, 0, MULDIV_RTYPE[instructionName]!!)
     }
 
@@ -73,6 +74,16 @@ class Parser(private val tokens: List<Token>) {
         val shamt = getInteger()
         // NOTE: Similarly, rs is arbitrarily chosen to be 0.
         return RTypeInstruction(0, 0, rt, rd, shamt, SHIFT_RTYPE[instructionName]!!)
+    }
+
+    private fun parseOtherRTypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rd = getRegister()
+
+        val pos = OTHER_RTYPE_POS[instructionName]!!
+        // Yet, again, we pass 0 for all unused registers.
+        return if (pos == 1) RTypeInstruction(0, rd, 0,0,0, OTHER_RTYPE[instructionName]!!)
+                    else RTypeInstruction(0, 0, 0, rd, 0, OTHER_RTYPE[instructionName]!!)
     }
 
     private fun parseITypeInstruction(): Instruction {
