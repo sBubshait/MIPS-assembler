@@ -169,6 +169,24 @@ val Constant_IType = mapOf(
     "sltiu" to 0x0b
 )
 
+val Branch_IType = mapOf(
+    "beq"  to 0x04,
+    "bne"  to 0x05,
+    "bgez" to 0x01,
+    "bgtz" to 0x07,
+    "blez" to 0x06,
+    "bltz" to 0x01
+)
+
+val Branch_IType_Args = mapOf(
+    "beq"  to 2,
+    "bne"  to 2,
+    "bgez" to 1,
+    "bgtz" to 1,
+    "blez" to 1,
+    "bltz" to 1
+)
+
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
 
 val INSTRUCTION_NAMES = INSTRUCTIONS.keys.toList()

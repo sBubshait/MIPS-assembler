@@ -12,6 +12,7 @@ main:
 	jr $s0
 	MFHI $t0
 	mul $t0, $t1, $t2
+	beq $t0, $t1, repeat
 
 repeat:
     addi $t0, $t0, 1

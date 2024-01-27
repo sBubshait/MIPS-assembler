@@ -12,14 +12,7 @@ class Parser(private val tokens: List<Token>) {
     private fun next() = instructionTokens.removeFirstOrNull()
 
     fun parse(): List<Instruction> {
-        instructions.clear()
-        while (instructionTokens.isNotEmpty()) {
-            val instruction = parseInstruction()
-            instructions.add(instruction)
-        }
-
         val textSection = tokens.dropWhile { it.type != TokenType.DIRECTIVE || it.value != "text" }.drop(1)
-
         for (token in textSection) {
             when (token.type) {
                 TokenType.LABEL -> labelAddresses[token.value] = currentAddress
@@ -27,7 +20,15 @@ class Parser(private val tokens: List<Token>) {
                 else -> {}
             }
         }
-        println(labelAddresses)
+
+        currentAddress = 0x00400000
+        instructions.clear()
+        while (instructionTokens.isNotEmpty()) {
+            val instruction = parseInstruction()
+            instructions.add(instruction)
+            currentAddress += 4
+        }
+
 
         return instructions
     }
@@ -117,6 +118,7 @@ class Parser(private val tokens: List<Token>) {
         val instructionName = peek()!!.value
         return when (instructionName) {
             in Constant_IType -> parseConstantITypeInstruction()
+            in Branch_IType -> parseBranchITypeInstruction()
             else -> throwErr("Invalid instruction $instructionName")
         }
     }
@@ -129,6 +131,21 @@ class Parser(private val tokens: List<Token>) {
         skipComma()
         val immediate = getInteger()
         return ITypeInstruction(Constant_IType[instructionName]!!, rs, rt, immediate)
+    }
+
+    private fun parseBranchITypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rs = getRegister()
+        skipComma()
+        var rt = if (instructionName == "bgez") 0x01 else 0x00
+        if (Branch_IType_Args[instructionName] == 2) {
+            rt = getRegister()
+            skipComma()
+        }
+        val address = getLabelAddress()
+        val offset_imm = (address - currentAddress) / 4
+        println("$address, $currentAddress, ${address - currentAddress}, $offset_imm")
+        return ITypeInstruction(Branch_IType[instructionName]!!, rs, rt, offset_imm)
     }
 
     private fun parseJTypeInstruction(): Instruction {
@@ -145,6 +162,12 @@ class Parser(private val tokens: List<Token>) {
         kotlin.assert(peek() != null && peek()!!.type == TokenType.NUMBER) { "Expected integer, got ${peek()!!.value}" }
         val value = next()!!.value
         return value.toIntOrNull() ?: throwErr("Invalid integer: $value")
+    }
+
+    private fun getLabelAddress(): Int {
+        kotlin.assert(peek() != null && peek()!!.type == TokenType.IDENTIFIER) { "Expected an identifier for a label, got ${peek()!!.value}" }
+        val label = next()!!.value
+        return labelAddresses[label] ?: throwErr("Invalid label: $label. Label must be defined before use.")
     }
 
     private fun skipComma() {
