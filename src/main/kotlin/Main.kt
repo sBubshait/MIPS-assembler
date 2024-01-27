@@ -6,6 +6,8 @@ fun main () {
     println(tokens)
     val parser = Parser(tokens)
     val instructions = parser.parse()
-    println(instructions)
-    println("%05d".format(16.toString(2).toInt()))
+
+    INSTRUCTIONS.filter { it.value == INSTRUCTION_TYPE.I_TYPE }.forEach {
+        println(it.key)
+    }
 }

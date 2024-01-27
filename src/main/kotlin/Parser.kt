@@ -3,6 +3,10 @@ class Parser(private val tokens: List<Token>) {
 
     private val instructionTokens = getInstructionTokens().toMutableList()
     private val instructions = mutableListOf<Instruction>()
+    private val labels
+        get() = tokens.filter { it.type == TokenType.LABEL }.map { it.value }
+    private val labelAddresses = mutableMapOf<String, Int>()
+    private var currentAddress = 0x00400000 // A common starting address for MIPS programs.
 
     private fun peek() = instructionTokens.firstOrNull()
     private fun next() = instructionTokens.removeFirstOrNull()
@@ -13,6 +17,17 @@ class Parser(private val tokens: List<Token>) {
             val instruction = parseInstruction()
             instructions.add(instruction)
         }
+
+        val textSection = tokens.dropWhile { it.type != TokenType.DIRECTIVE || it.value != "text" }.drop(1)
+
+        for (token in textSection) {
+            when (token.type) {
+                TokenType.LABEL -> labelAddresses[token.value] = currentAddress
+                TokenType.IDENTIFIER -> if (token.value in INSTRUCTION_NAMES) currentAddress += 4
+                else -> {}
+            }
+        }
+        println(labelAddresses)
 
         return instructions
     }
@@ -43,6 +58,7 @@ class Parser(private val tokens: List<Token>) {
             in MULDIV_RTYPE_NAMES  -> parseMulDivRTypeInstruction()
             in SHIFT_RTYPE_NAMES ->  parseShiftRTypeInstruction()
             in OTHER_RTYPE_NAMES -> parseOtherRTypeInstruction()
+            "mul" -> parseMulRTypeInstruction()
             else -> throwErr("Invalid instruction $instructionName")
         }
     }
@@ -87,8 +103,32 @@ class Parser(private val tokens: List<Token>) {
                     else RTypeInstruction(0, 0, 0, rd, 0, OTHER_RTYPE[instructionName]!!)
     }
 
+    private fun parseMulRTypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rd = getRegister()
+        skipComma()
+        val rs = getRegister()
+        skipComma()
+        val rt = getRegister()
+        return RTypeInstruction(0x1c, rs, rt, rd, 0, 0x02)
+    }
+
     private fun parseITypeInstruction(): Instruction {
-        return RTypeInstruction(0, 0, 0, 0, 0, 0)
+        val instructionName = peek()!!.value
+        return when (instructionName) {
+            in Constant_IType -> parseConstantITypeInstruction()
+            else -> throwErr("Invalid instruction $instructionName")
+        }
+    }
+
+    private fun parseConstantITypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rt = getRegister()
+        skipComma()
+        val rs = getRegister()
+        skipComma()
+        val immediate = getInteger()
+        return ITypeInstruction(Constant_IType[instructionName]!!, rs, rt, immediate)
     }
 
     private fun parseJTypeInstruction(): Instruction {

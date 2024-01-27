@@ -159,6 +159,16 @@ val OTHER_RTYPE_POS = mapOf(
     "mtlo" to 1
 )
 
+val Constant_IType = mapOf(
+    "addi"  to 0x08,
+    "addiu" to 0x09,
+    "andi"  to 0x0c,
+    "ori"   to 0x0d,
+    "xori"  to 0x0e,
+    "slti"  to 0x0a,
+    "sltiu" to 0x0b
+)
+
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
 
 val INSTRUCTION_NAMES = INSTRUCTIONS.keys.toList()

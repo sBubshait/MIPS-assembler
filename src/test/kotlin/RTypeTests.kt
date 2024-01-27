@@ -67,4 +67,17 @@ class RTypeTests {
         assertEquals("00000010000000000000000000001000", instructions[0].toBinary())
         assertEquals("00000000000000001001000000010000", instructions[1].toBinary())
     }
+
+    @Test
+    fun `can parse mul R-type instruction`() {
+        val lexer = Lexer(
+            "main:\n" +
+                    "mul \$t0, \$t1, \$t2\n"
+        )
+
+        val tokens = lexer.tokenize()
+        val parser = Parser(tokens)
+        val instructions = parser.parse()
+        assertEquals("01110001001010100100000000000010", instructions[0].toBinary())
+    }
 }
