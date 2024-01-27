@@ -1,4 +1,4 @@
-
+package MIPSAssembler
 class Parser(private val tokens: List<Token>) {
 
     private val instructionTokens = getInstructionTokens().toMutableList()
@@ -12,14 +12,14 @@ class Parser(private val tokens: List<Token>) {
     private fun next() = instructionTokens.removeFirstOrNull()
 
     fun parse(): List<Instruction> {
-        val textSection = tokens.dropWhile { it.type != TokenType.DIRECTIVE || it.value != "text" }.drop(1)
-        for (token in textSection) {
+        for (token in tokens) {
             when (token.type) {
                 TokenType.LABEL -> labelAddresses[token.value] = currentAddress
                 TokenType.IDENTIFIER -> if (token.value in INSTRUCTION_NAMES) currentAddress += 4
                 else -> {}
             }
         }
+        println(labelAddresses)
 
         currentAddress = 0x00400000
         instructions.clear()
@@ -161,7 +161,9 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun parseJTypeInstruction(): Instruction {
-        return RTypeInstruction(0, 0, 0, 0, 0, 0)
+        val instructionName = next()!!.value
+        val address = getLabelAddress()
+        return JTypeInstruction(JTypeInstructions[instructionName]!!, address)
     }
 
     private fun getRegister(): Int {

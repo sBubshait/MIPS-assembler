@@ -1,4 +1,4 @@
-
+package MIPSAssembler
 const val REGISTER_COUNT = 32
 val REGISTERS: Map<String, Int> = mapOf(
     "zero" to 0,
@@ -200,6 +200,11 @@ val Memory_IType = mapOf(
     "sc"  to 0x38
 )
 
+val JTypeInstructions = mapOf(
+    "j"   to 0x02,
+    "jal" to 0x03
+)
+
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
 
 val INSTRUCTION_NAMES = INSTRUCTIONS.keys.toList()
@@ -252,8 +257,9 @@ class JTypeInstruction(
     val address: Int
 ) : Instruction {
     override fun toBinary(): String {
+        println("JTypeInstruction(opcode=$opcode, address=$address)")
         return "%06d".format(opcode.toString(2).toInt()) +
-                "%026d".format(address.toString(2).toInt())
+                address.toString(2).padStart(26, '0')
     }
 }
 

@@ -1,4 +1,6 @@
 
+import MIPSAssembler.Lexer
+import MIPSAssembler.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

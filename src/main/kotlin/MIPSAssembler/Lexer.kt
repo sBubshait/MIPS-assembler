@@ -1,3 +1,5 @@
+package MIPSAssembler
+
 enum class TokenType {
     REGISTER,
     NUMBER,
