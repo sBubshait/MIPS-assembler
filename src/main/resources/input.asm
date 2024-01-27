@@ -13,6 +13,7 @@ main:
 	MFHI $t0
 	mul $t0, $t1, $t2
 	beq $t0, $t1, repeat
+	lb $s0, 0($t0)
 
 repeat:
     addi $t0, $t0, 1

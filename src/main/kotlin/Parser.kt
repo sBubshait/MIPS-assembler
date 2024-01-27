@@ -119,6 +119,7 @@ class Parser(private val tokens: List<Token>) {
         return when (instructionName) {
             in Constant_IType -> parseConstantITypeInstruction()
             in Branch_IType -> parseBranchITypeInstruction()
+            in Memory_IType -> parseMemoryITypeInstruction()
             else -> throwErr("Invalid instruction $instructionName")
         }
     }
@@ -148,6 +149,14 @@ class Parser(private val tokens: List<Token>) {
         return ITypeInstruction(Branch_IType[instructionName]!!, rs, rt, offset_imm)
     }
 
+    private fun parseMemoryITypeInstruction(): Instruction {
+        val instructionName = next()!!.value
+        val rt = getRegister()
+        skipComma()
+        val (base, offset) = getMemoryAddress()
+        return ITypeInstruction(Memory_IType[instructionName]!!, base, rt, offset)
+    }
+
     private fun parseJTypeInstruction(): Instruction {
         return RTypeInstruction(0, 0, 0, 0, 0, 0)
     }
@@ -168,6 +177,19 @@ class Parser(private val tokens: List<Token>) {
         kotlin.assert(peek() != null && peek()!!.type == TokenType.IDENTIFIER) { "Expected an identifier for a label, got ${peek()!!.value}" }
         val label = next()!!.value
         return labelAddresses[label] ?: throwErr("Invalid label: $label. Label must be defined before use.")
+    }
+
+    private fun getMemoryAddress(): Pair<Int, Int> {
+        val offset = getInteger()
+        kotlin.assert(peek() != null && peek()!!.type == TokenType.OPEN_PAREN) { "Expected open parenthesis, got ${peek()!!.value}" }
+        next()
+
+        val base = getRegister()
+
+        kotlin.assert(peek() != null && peek()!!.type == TokenType.CLOSE_PAREN) { "Expected close parenthesis, got ${peek()!!.value}" }
+        next()
+
+        return Pair(base, offset)
     }
 
     private fun skipComma() {

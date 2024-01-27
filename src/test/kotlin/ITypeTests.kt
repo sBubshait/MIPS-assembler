@@ -30,4 +30,16 @@ class ITypeTests {
         val instructions = parser.parse()
         assertEquals("00010010000100010000000000000010", instructions[0].toBinary())
     }
+
+    @Test
+    fun `can parse simple memory address I-type instructions, eg lb lw etc`() {
+        val lexer = Lexer(
+            "main:\n" +
+                    "lw \$s0, 4(\$s1)\n"
+        )
+        val tokens = lexer.tokenize()
+        val parser = Parser(tokens)
+        val instructions = parser.parse()
+        assertEquals("10001110001100000000000000000100", instructions[0].toBinary())
+    }
 }

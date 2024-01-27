@@ -187,6 +187,17 @@ val Branch_IType_Args = mapOf(
     "bltz" to 1
 )
 
+val Memory_IType = mapOf(
+    "lb"  to 0x20,
+    "lbu" to 0x24,
+    "lh"  to 0x21,
+    "lhu" to 0x25,
+    "lw"  to 0x23,
+    "sb"  to 0x28,
+    "sh"  to 0x29,
+    "sw"  to 0x2b
+)
+
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
 
 val INSTRUCTION_NAMES = INSTRUCTIONS.keys.toList()
