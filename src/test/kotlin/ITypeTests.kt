@@ -42,4 +42,16 @@ class ITypeTests {
         val instructions = parser.parse()
         assertEquals("10001110001100000000000000000100", instructions[0].toBinary())
     }
+
+    @Test
+    fun `can parse lui`() {
+        val lexer = Lexer(
+            "main:\n" +
+                    "lui \$s0, 16\n"
+        )
+        val tokens = lexer.tokenize()
+        val parser = Parser(tokens)
+        val instructions = parser.parse()
+        assertEquals("00111100000100000000000000010000", instructions[0].toBinary())
+    }
 }

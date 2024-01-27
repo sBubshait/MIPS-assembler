@@ -7,7 +7,7 @@ fun main () {
     val parser = Parser(tokens)
     val instructions = parser.parse()
 
-    INSTRUCTIONS.filter { it.value == INSTRUCTION_TYPE.I_TYPE }.forEach {
+    INSTRUCTIONS.filter { it.value == INSTRUCTION_TYPE.I_TYPE }.minus(Constant_IType.keys).minus(Branch_IType.keys).minus(Memory_IType.keys).forEach {
         println(it.key)
     }
 }

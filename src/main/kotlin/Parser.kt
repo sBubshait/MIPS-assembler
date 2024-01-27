@@ -117,7 +117,7 @@ class Parser(private val tokens: List<Token>) {
     private fun parseITypeInstruction(): Instruction {
         val instructionName = peek()!!.value
         return when (instructionName) {
-            in Constant_IType -> parseConstantITypeInstruction()
+            in Constant_IType, "lui" -> parseConstantITypeInstruction()
             in Branch_IType -> parseBranchITypeInstruction()
             in Memory_IType -> parseMemoryITypeInstruction()
             else -> throwErr("Invalid instruction $instructionName")
@@ -128,8 +128,11 @@ class Parser(private val tokens: List<Token>) {
         val instructionName = next()!!.value
         val rt = getRegister()
         skipComma()
-        val rs = getRegister()
-        skipComma()
+        var rs = 0
+        if (instructionName != "lui") {
+            rs = getRegister()
+            skipComma()
+        }
         val immediate = getInteger()
         return ITypeInstruction(Constant_IType[instructionName]!!, rs, rt, immediate)
     }

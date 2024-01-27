@@ -166,7 +166,8 @@ val Constant_IType = mapOf(
     "ori"   to 0x0d,
     "xori"  to 0x0e,
     "slti"  to 0x0a,
-    "sltiu" to 0x0b
+    "sltiu" to 0x0b,
+    "lui"   to 0x0f
 )
 
 val Branch_IType = mapOf(
@@ -195,7 +196,8 @@ val Memory_IType = mapOf(
     "lw"  to 0x23,
     "sb"  to 0x28,
     "sh"  to 0x29,
-    "sw"  to 0x2b
+    "sw"  to 0x2b,
+    "sc"  to 0x38
 )
 
 val SIMPLE_RTYPE_NAMES = SIMPLE_RTYPE.keys.toList()
