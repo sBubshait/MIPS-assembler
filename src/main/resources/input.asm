@@ -1,7 +1,7 @@
-# Sample Program to add two numbers and store it in a register
+# A Simple MIPS program to compute N*(N+3)
 
-	.text 					# Code Segment
-	.globl main 				# Declaring main as global
+	.text 					 # Code Segment
+	.globl main 			 # Declaring main as global
 main:
 	lw     $t0, 4($gp)       # fetch N
     add    $t1, $t0, $zero   # copy N to $t1
