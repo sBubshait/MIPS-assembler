@@ -1,7 +1,8 @@
-package MIPSAssembler
+package mipsassembler
 
 import java.io.File
-fun main () {
+
+fun main() {
     val file = File("src/main/resources/input.asm")
     val lexer = Lexer(file.readText())
     val tokens = lexer.tokenize()

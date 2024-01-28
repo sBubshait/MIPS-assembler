@@ -1,25 +1,23 @@
-package MIPSAssembler
-class Parser(private val tokens: List<Token>) {
+package mipsassembler
 
+class Parser(private val tokens: List<Token>) {
     private val instructionTokens = getInstructionTokens().toMutableList()
     private val instructions = mutableListOf<Instruction>()
-    private val labels
-        get() = tokens.filter { it.type == TokenType.LABEL }.map { it.value }
     private val labelAddresses = mutableMapOf<String, Int>()
     private var currentAddress = 0x00400000 // A common starting address for MIPS programs.
 
     private fun peek() = instructionTokens.firstOrNull()
+
     private fun next() = instructionTokens.removeFirstOrNull()
 
     fun parse(): List<Instruction> {
         for (token in tokens) {
             when (token.type) {
                 TokenType.LABEL -> labelAddresses[token.value] = currentAddress
-                TokenType.IDENTIFIER -> if (token.value in INSTRUCTION_NAMES) currentAddress += 4
+                TokenType.IDENTIFIER -> if (token.value in INSTRUCTIONS) currentAddress += 4
                 else -> {}
             }
         }
-        println(labelAddresses)
 
         currentAddress = 0x00400000
         instructions.clear()
@@ -29,10 +27,8 @@ class Parser(private val tokens: List<Token>) {
             currentAddress += 4
         }
 
-
         return instructions
     }
-
 
     private fun parseInstruction(): Instruction {
         val instructionToken = peek()!!
@@ -46,21 +42,20 @@ class Parser(private val tokens: List<Token>) {
         val instructionType = INSTRUCTIONS[instructionName] ?: throwErr("Invalid instruction $instructionName")
 
         return when (instructionType) {
-            INSTRUCTION_TYPE.R_TYPE -> parseRTypeInstruction()
-            INSTRUCTION_TYPE.I_TYPE -> parseITypeInstruction()
-            INSTRUCTION_TYPE.J_TYPE -> parseJTypeInstruction()
+            InstructionType.R_TYPE -> parseRTypeInstruction()
+            InstructionType.I_TYPE -> parseITypeInstruction()
+            InstructionType.J_TYPE -> parseJTypeInstruction()
         }
     }
 
     private fun parseRTypeInstruction(): Instruction {
-        val instructionName = peek()!!.value
-        return when (instructionName) {
-            in SIMPLE_RTYPE_NAMES -> parseSimpleRTypeInstruction()
-            in MULDIV_RTYPE_NAMES  -> parseMulDivRTypeInstruction()
-            in SHIFT_RTYPE_NAMES ->  parseShiftRTypeInstruction()
-            in OTHER_RTYPE_NAMES -> parseOtherRTypeInstruction()
+        return when (peek()!!.value) {
+            in SIMPLE_RTYPE -> parseSimpleRTypeInstruction()
+            in MULDIV_RTYPE -> parseMulDivRTypeInstruction()
+            in SHIFT_RTYPE -> parseShiftRTypeInstruction()
+            in OTHER_RTYPE -> parseOtherRTypeInstruction()
             "mul" -> parseMulRTypeInstruction()
-            else -> throwErr("Invalid instruction $instructionName")
+            else -> throwErr("Invalid instruction ${peek()!!.value}")
         }
     }
 
@@ -79,7 +74,7 @@ class Parser(private val tokens: List<Token>) {
         val rs = getRegister()
         skipComma()
         val rt = getRegister()
-        // NOTE: rd is not used (dont care) so we just pass 0.
+        // NOTE: rd is not used (don't care) so we just pass 0.
         return RTypeInstruction(0, rs, rt, 0, 0, MULDIV_RTYPE[instructionName]!!)
     }
 
@@ -100,12 +95,15 @@ class Parser(private val tokens: List<Token>) {
 
         val pos = OTHER_RTYPE_POS[instructionName]!!
         // Yet, again, we pass 0 for all unused registers.
-        return if (pos == 1) RTypeInstruction(0, rd, 0,0,0, OTHER_RTYPE[instructionName]!!)
-                    else RTypeInstruction(0, 0, 0, rd, 0, OTHER_RTYPE[instructionName]!!)
+        return if (pos == 1) {
+            RTypeInstruction(0, rd, 0, 0, 0, OTHER_RTYPE[instructionName]!!)
+        } else {
+            RTypeInstruction(0, 0, 0, rd, 0, OTHER_RTYPE[instructionName]!!)
+        }
     }
 
     private fun parseMulRTypeInstruction(): Instruction {
-        val instructionName = next()!!.value
+        next()
         val rd = getRegister()
         skipComma()
         val rs = getRegister()
@@ -115,12 +113,11 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun parseITypeInstruction(): Instruction {
-        val instructionName = peek()!!.value
-        return when (instructionName) {
+        return when (peek()!!.value) {
             in Constant_IType, "lui" -> parseConstantITypeInstruction()
             in Branch_IType -> parseBranchITypeInstruction()
             in Memory_IType -> parseMemoryITypeInstruction()
-            else -> throwErr("Invalid instruction $instructionName")
+            else -> throwErr("Invalid instruction ${peek()!!.value}")
         }
     }
 
@@ -147,9 +144,9 @@ class Parser(private val tokens: List<Token>) {
             skipComma()
         }
         val address = getLabelAddress()
-        val offset_imm = (address - currentAddress) / 4
-        println("$address, $currentAddress, ${address - currentAddress}, $offset_imm")
-        return ITypeInstruction(Branch_IType[instructionName]!!, rs, rt, offset_imm)
+        val offset = (address - currentAddress) / 4
+        println("$address, $currentAddress, ${address - currentAddress}, $offset")
+        return ITypeInstruction(Branch_IType[instructionName]!!, rs, rt, offset)
     }
 
     private fun parseMemoryITypeInstruction(): Instruction {
@@ -179,7 +176,9 @@ class Parser(private val tokens: List<Token>) {
     }
 
     private fun getLabelAddress(): Int {
-        kotlin.assert(peek() != null && peek()!!.type == TokenType.IDENTIFIER) { "Expected an identifier for a label, got ${peek()!!.value}" }
+        kotlin.assert(
+            peek() != null && peek()!!.type == TokenType.IDENTIFIER,
+        ) { "Expected an identifier for a label, got ${peek()!!.value}" }
         val label = next()!!.value
         return labelAddresses[label] ?: throwErr("Invalid label: $label. Label must be defined before use.")
     }
@@ -203,8 +202,6 @@ class Parser(private val tokens: List<Token>) {
 
     private fun getInstructionTokens(): List<Token> {
         val tokensFromMain = tokens.dropWhile { it.type != TokenType.LABEL || it.value != "main" }
-        val instructionTokens = tokensFromMain.drop(1).takeWhile { it.type != TokenType.LABEL }
-
-        return instructionTokens
+        return tokensFromMain.drop(1).takeWhile { it.type != TokenType.LABEL }
     }
 }

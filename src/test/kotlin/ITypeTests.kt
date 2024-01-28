@@ -1,18 +1,19 @@
+package mipsassembler
 
-import MIPSAssembler.Lexer
-import MIPSAssembler.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
 
 class ITypeTests {
     @Test
     fun `can parse simple constant I-type instructions`() {
-        val lexer = Lexer(
-            "test:\n" +
+        val lexer =
+            Lexer(
+                "test:\n" +
                     "addi \$s0, \$s1, 2\n" +
                     "main:\n" +
-                    "j test"
-        )
+                    "j test",
+            )
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()
@@ -21,14 +22,15 @@ class ITypeTests {
 
     @Test
     fun `can parse branch I-type instructions`() {
-        val lexer = Lexer(
+        val lexer =
+            Lexer(
                 ".text\n" +
-            "main:\n" +
+                    "main:\n" +
                     "beq \$s0, \$s1, test\n" +
                     "addi \$s0, \$s1, 2\n" +
                     "test:\n" +
-                    "add \$t0, \$t1, \$t2\n"
-        )
+                    "add \$t0, \$t1, \$t2\n",
+            )
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()
@@ -37,10 +39,11 @@ class ITypeTests {
 
     @Test
     fun `can parse simple memory address I-type instructions, eg lb lw etc`() {
-        val lexer = Lexer(
-            "main:\n" +
-                    "lw \$s0, 4(\$s1)\n"
-        )
+        val lexer =
+            Lexer(
+                "main:\n" +
+                    "lw \$s0, 4(\$s1)\n",
+            )
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()
@@ -49,10 +52,11 @@ class ITypeTests {
 
     @Test
     fun `can parse lui`() {
-        val lexer = Lexer(
-            "main:\n" +
-                    "lui \$s0, 16\n"
-        )
+        val lexer =
+            Lexer(
+                "main:\n" +
+                    "lui \$s0, 16\n",
+            )
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()
@@ -61,10 +65,11 @@ class ITypeTests {
 
     @Test
     fun `can parse negative number in two's complement`() {
-        val lexer = Lexer(
-            "main:\n" +
-                    "addi \$s0, \$s1, -2\n"
-        )
+        val lexer =
+            Lexer(
+                "main:\n" +
+                    "addi \$s0, \$s1, -2\n",
+            )
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()

@@ -1,21 +1,23 @@
+package mipsassembler
 
-import MIPSAssembler.Lexer
-import MIPSAssembler.Parser
+import mipsassembler.Lexer
+import mipsassembler.Parser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RTypeTests {
     @Test
     fun `can parse simple R-type instructions`() {
-        val lexer = Lexer(
-            "main:\n" +
+        val lexer =
+            Lexer(
+                "main:\n" +
                     "add \$t0, \$t1, \$t2\n" +
                     "addu \$t0, \$t1, \$t2\n" +
                     "and \$t0, \$t1, \$t2\n" +
                     "nor \$t0, \$t1, \$t2\n" +
                     "or \$t0, \$t1, \$t2\n" +
-                    "slt \$t0, \$t1, \$t2\n"
-        )
+                    "slt \$t0, \$t1, \$t2\n",
+            )
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()
@@ -29,11 +31,12 @@ class RTypeTests {
 
     @Test
     fun `can parse mult-div R-type instructions`() {
-        val lexer = Lexer(
-            "main:\n" +
+        val lexer =
+            Lexer(
+                "main:\n" +
                     "div \$s0, \$s1\n" +
-                    "mult \$s0, \$s1\n"
-        )
+                    "mult \$s0, \$s1\n",
+            )
 
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
@@ -44,10 +47,11 @@ class RTypeTests {
 
     @Test
     fun `can parse shift R-type instructions`() {
-        val lexer = Lexer(
-            "main:\n" +
-                    "sll \$t0, \$t1, 2\n"
-        )
+        val lexer =
+            Lexer(
+                "main:\n" +
+                    "sll \$t0, \$t1, 2\n",
+            )
 
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
@@ -57,11 +61,12 @@ class RTypeTests {
 
     @Test
     fun `can parse other R-type instructions`() {
-        val lexer = Lexer(
-            "main:\n" +
+        val lexer =
+            Lexer(
+                "main:\n" +
                     "jr \$s0\n" +
-                    "mfhi \$s2\n"
-        )
+                    "mfhi \$s2\n",
+            )
 
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
@@ -72,10 +77,11 @@ class RTypeTests {
 
     @Test
     fun `can parse mul R-type instruction`() {
-        val lexer = Lexer(
-            "main:\n" +
-                    "mul \$t0, \$t1, \$t2\n"
-        )
+        val lexer =
+            Lexer(
+                "main:\n" +
+                    "mul \$t0, \$t1, \$t2\n",
+            )
 
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)

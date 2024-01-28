@@ -1,4 +1,4 @@
-package MIPSAssembler
+package mipsassembler
 
 enum class TokenType {
     REGISTER,
@@ -15,8 +15,7 @@ const val PUNCTUATION = ".,:()"
 
 data class Token(val type: TokenType, val value: String = "")
 
-class Lexer (private val input: String) {
-
+class Lexer(private val input: String) {
     private var pos = 0
 
     fun nextChar(): Char? {
@@ -36,32 +35,18 @@ class Lexer (private val input: String) {
     fun tokenize(): List<Token> {
         val tokens = mutableListOf<Token>()
         while (pos < input.length) {
-            val c = peekChar()
-            if (c == null) {
-                break
-            }
+            val c = peekChar() ?: break
             when (c) {
-                ' ', '\t', '\n', '\r' -> {nextChar(); continue}
-                '$' -> {
+                ' ', '\t', '\n', '\r' -> {
                     nextChar()
-                    val name = readWord()
-                    if (name !in REGISTER_NAMES) {
-                        throwErr("Invalid register name $name")
-                    }
-                    tokens.add(Token(TokenType.REGISTER, name))
+                    continue
                 }
-                in '0'..'9', '-' -> tokens.add(Token(TokenType.NUMBER, readNumber().toString()))
-                in 'a'..'z', in 'A'..'Z' -> tokens.add(tokenizeIdentifier())
+                '$' -> tokens.add(readRegister())
+                in '0'..'9', '-' -> tokens.add(readNumber())
+                in 'a'..'z', in 'A'..'Z' -> tokens.add(readIdentifier())
                 ',' -> tokens.add(Token(TokenType.COMMA, nextChar().toString()))
                 '#' -> readComment()
-                '.' -> {
-                    nextChar()
-                    val name = readWord()
-                    if (name !in DIRECTIVES) {
-                        throwErr("Invalid directive $name")
-                    }
-                    tokens.add(Token(TokenType.DIRECTIVE, name))
-                }
+                '.' -> tokens.add(readDirective())
                 '(' -> tokens.add(Token(TokenType.OPEN_PAREN, nextChar().toString()))
                 ')' -> tokens.add(Token(TokenType.CLOSE_PAREN, nextChar().toString()))
                 else -> throwErr("Invalid character $c")
@@ -70,7 +55,7 @@ class Lexer (private val input: String) {
         return tokens
     }
 
-    private fun readNumber(): Int {
+    private fun readNumber(): Token {
         val number = StringBuilder()
         val fst = peekChar()
         var base = 10
@@ -79,8 +64,9 @@ class Lexer (private val input: String) {
         }
         while (true) {
             var next = peekChar() ?: break
-            if (next.isWhitespace() || next in PUNCTUATION)
+            if (next.isWhitespace() || next in PUNCTUATION) {
                 break
+            }
             if ((fst == '-' && number.length == 1 || number.isEmpty()) && next == '0') {
                 number.append(nextChar())
                 val nextNext = peekChar()
@@ -96,19 +82,26 @@ class Lexer (private val input: String) {
                         number.append(nextNext)
                     }
                     ' ', '\t', '\n', '\r', null, in PUNCTUATION -> {
-                        return 0
+                        return Token(TokenType.NUMBER, "0")
                     }
                     else -> throwErr("Invalid number starting with $number")
                 }
                 nextChar()
             }
             next = peekChar() ?: break
-            assert ((base == 10 && next.isDigit()) || (base == 16 && (next in '0'..'9' || next in 'a'..'f' || next in 'A'..'F')) || (base == 2 && next in '0'..'1'), { "Invalid character in integer starting with $next" } )
+            assert(
+                (base == 10 && next.isDigit()) ||
+                    (base == 16 && (next in '0'..'9' || next in 'a'..'f' || next in 'A'..'F')) ||
+                    (base == 2 && next in '0'..'1'),
+            ) {
+                "Invalid character in integer starting with $next"
+            }
             number.append(next)
             nextChar()
         }
 
-        return number.toString().toIntOrNull(base) ?: throwErr("Invalid number $number")
+        val n = number.toString().toIntOrNull(base) ?: throwErr("Invalid number $number")
+        return Token(TokenType.NUMBER, n.toString())
     }
 
     private fun readWord(): String {
@@ -118,7 +111,7 @@ class Lexer (private val input: String) {
             if (next == null || next.isWhitespace() || next in PUNCTUATION) {
                 break
             }
-            assert(next.isLetterOrDigit(), { "Invalid character $next" })
+            assert(next.isLetterOrDigit()) { "Invalid character $next" }
             word.append(next.lowercase())
             nextChar()
         }
@@ -131,7 +124,25 @@ class Lexer (private val input: String) {
         }
     }
 
-    private fun tokenizeIdentifier(): Token {
+    private fun readRegister(): Token {
+        nextChar()
+        val name = readWord()
+        if (name !in REGISTERS) {
+            throwErr("Invalid register name $name")
+        }
+        return Token(TokenType.REGISTER, name)
+    }
+
+    private fun readDirective(): Token {
+        nextChar()
+        val name = readWord()
+        if (name !in DIRECTIVES) {
+            throwErr("Invalid directive $name")
+        }
+        return Token(TokenType.DIRECTIVE, name)
+    }
+
+    private fun readIdentifier(): Token {
         val word = readWord()
         if (peekChar() == ':') {
             nextChar()
@@ -139,7 +150,4 @@ class Lexer (private val input: String) {
         }
         return Token(TokenType.IDENTIFIER, word)
     }
-
-
 }
-
