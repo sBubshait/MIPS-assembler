@@ -58,4 +58,16 @@ class ITypeTests {
         val instructions = parser.parse()
         assertEquals("00111100000100000000000000010000", instructions[0].toBinary())
     }
+
+    @Test
+    fun `can parse negative number in two's complement`() {
+        val lexer = Lexer(
+            "main:\n" +
+                    "addi \$s0, \$s1, -2\n"
+        )
+        val tokens = lexer.tokenize()
+        val parser = Parser(tokens)
+        val instructions = parser.parse()
+        assertEquals("00100010001100001111111111111110", instructions[0].toBinary())
+    }
 }

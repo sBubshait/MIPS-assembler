@@ -170,17 +170,6 @@ val Constant_IType = mapOf(
     "lui"   to 0x0f
 )
 
-val Constant_IType_Signed = mapOf(
-    "addi"  to true,
-    "addiu" to false,
-    "andi"  to false,
-    "ori"   to false,
-    "xori"  to false,
-    "slti"  to true,
-    "sltiu" to false,
-    "lui"   to false
-)
-
 val Branch_IType = mapOf(
     "beq"  to 0x04,
     "bne"  to 0x05,
@@ -259,7 +248,7 @@ class ITypeInstruction(
         return toBinaryString(opcode, 6) +
                 toBinaryString(rs, 5) +
                 toBinaryString(rt, 5) +
-                toBinaryString(immediate, 16)
+                toBinaryStringForImmediate(immediate)
     }
 }
 
@@ -276,6 +265,12 @@ class JTypeInstruction(
 
 fun toBinaryString(value: Int, bits: Int): String {
     return String.format("%${bits}s", Integer.toBinaryString(value and ((1 shl bits) - 1))).replace(' ', '0')
+}
+
+fun toBinaryStringForImmediate(value: Int): String {
+    // Get the lower 16 bits for both positive and negative values correctly.
+    val lower16Bits = value and 0xFFFF
+    return String.format("%16s", Integer.toBinaryString(lower16Bits)).replace(' ', '0')
 }
 
 

@@ -38,9 +38,10 @@ class MiscTests {
     }
 
     @Test
-    fun `Lexer can handle numbers in binary, hexadecimal, and decimal`() {
+    fun `Lexer can handle numbers in negative, binary, hexadecimal, and decimal`() {
         val lexer = Lexer(
             "main:\n"  +
+                    "addi \$t0, \$t1, -7\n" +
                     "addi \$t0, \$t1, 7\n" +
                     "addi \$t0, \$t1, 0xa\n" +
                     "addi \$t0, \$t1, 0b10\n" +
@@ -48,11 +49,12 @@ class MiscTests {
         )
         val tokens = lexer.tokenize()
         val nums = tokens.filter { it.type == TokenType.NUMBER }
-        assertEquals(4, nums.size)
-        assertEquals("7", nums[0].value)
-        assertEquals("10", nums[1].value)
-        assertEquals("2", nums[2].value)
-        assertEquals("14", nums[3].value)
+        assertEquals(5, nums.size)
+        assertEquals("-7", nums[0].value)
+        assertEquals("7", nums[1].value)
+        assertEquals("10", nums[2].value)
+        assertEquals("2", nums[3].value)
+        assertEquals("14", nums[4].value)
     }
 
 }

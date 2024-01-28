@@ -95,6 +95,9 @@ class Lexer (private val input: String) {
                         base = 10
                         number.append(nextNext)
                     }
+                    ' ', '\t', '\n', '\r', null, in PUNCTUATION -> {
+                        return 0
+                    }
                     else -> throwErr("Invalid number starting with $number")
                 }
                 nextChar()
