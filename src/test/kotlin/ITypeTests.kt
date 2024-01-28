@@ -16,7 +16,7 @@ class ITypeTests {
         val tokens = lexer.tokenize()
         val parser = Parser(tokens)
         val instructions = parser.parse()
-        assertEquals("00100010001100000000000000000010", instructions[0].toBinary())
+        assertEquals("00001000010000000000000000000000", instructions[0].toBinary())
     }
 
     @Test

@@ -50,7 +50,7 @@ class Lexer (private val input: String) {
                     }
                     tokens.add(Token(TokenType.REGISTER, name))
                 }
-                in '0'..'9' -> tokens.add(Token(TokenType.NUMBER, readNumber()))
+                in '0'..'9', '-' -> tokens.add(Token(TokenType.NUMBER, readNumber().toString()))
                 in 'a'..'z', in 'A'..'Z' -> tokens.add(tokenizeIdentifier())
                 ',' -> tokens.add(Token(TokenType.COMMA, nextChar().toString()))
                 '#' -> readComment()
@@ -70,18 +70,42 @@ class Lexer (private val input: String) {
         return tokens
     }
 
-    private fun readNumber(): String {
+    private fun readNumber(): Int {
         val number = StringBuilder()
+        val fst = peekChar()
+        var base = 10
+        if (fst == '-') {
+            number.append(nextChar())
+        }
         while (true) {
-            val next = peekChar()
-            if (next == null || next.isWhitespace() || next in PUNCTUATION) {
+            var next = peekChar() ?: break
+            if (next.isWhitespace() || next in PUNCTUATION)
                 break
+            if ((fst == '-' && number.length == 1 || number.isEmpty()) && next == '0') {
+                number.append(nextChar())
+                val nextNext = peekChar()
+                when (nextNext) {
+                    'x', 'X' -> {
+                        base = 16
+                    }
+                    'b', 'B' -> {
+                        base = 2
+                    }
+                    in '0'..'9' -> {
+                        base = 10
+                        number.append(nextNext)
+                    }
+                    else -> throwErr("Invalid number starting with $number")
+                }
+                nextChar()
             }
-            assert(next.isDigit(), { "Invalid number character $next" })
+            next = peekChar() ?: break
+            assert ((base == 10 && next.isDigit()) || (base == 16 && (next in '0'..'9' || next in 'a'..'f' || next in 'A'..'F')) || (base == 2 && next in '0'..'1'), { "Invalid character in integer starting with $next" } )
             number.append(next)
             nextChar()
         }
-        return number.toString()
+
+        return number.toString().toIntOrNull(base) ?: throwErr("Invalid number $number")
     }
 
     private fun readWord(): String {

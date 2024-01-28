@@ -170,6 +170,17 @@ val Constant_IType = mapOf(
     "lui"   to 0x0f
 )
 
+val Constant_IType_Signed = mapOf(
+    "addi"  to true,
+    "addiu" to false,
+    "andi"  to false,
+    "ori"   to false,
+    "xori"  to false,
+    "slti"  to true,
+    "sltiu" to false,
+    "lui"   to false
+)
+
 val Branch_IType = mapOf(
     "beq"  to 0x04,
     "bne"  to 0x05,
@@ -225,12 +236,12 @@ class RTypeInstruction(
     val funct: Int
 ) : Instruction {
     override fun toBinary(): String {
-        return  "%06d".format(opcode.toString(2).toInt()) +
-                "%05d".format(rs.toString(2).toInt()) +
-                "%05d".format(rt.toString(2).toInt()) +
-                "%05d".format(rd.toString(2).toInt()) +
-                "%05d".format(shamt.toString(2).toInt()) +
-                "%06d".format(funct.toString(2).toInt())
+        return  toBinaryString(opcode, 6) +
+                toBinaryString(rs, 5) +
+                toBinaryString(rt, 5) +
+                toBinaryString(rd, 5) +
+                toBinaryString(shamt, 5) +
+                toBinaryString(funct, 6)
     }
 
     override fun toString(): String {
@@ -245,10 +256,10 @@ class ITypeInstruction(
     val immediate: Int
 ) : Instruction {
     override fun toBinary(): String {
-        return "%06d".format(opcode.toString(2).toInt()) +
-                "%05d".format(rs.toString(2).toInt()) +
-                "%05d".format(rt.toString(2).toInt()) +
-                "%016d".format(immediate.toString(2).toInt())
+        return toBinaryString(opcode, 6) +
+                toBinaryString(rs, 5) +
+                toBinaryString(rt, 5) +
+                toBinaryString(immediate, 16)
     }
 }
 
@@ -259,8 +270,12 @@ class JTypeInstruction(
     override fun toBinary(): String {
         println("JTypeInstruction(opcode=$opcode, address=$address)")
         return "%06d".format(opcode.toString(2).toInt()) +
-                address.toString(2).padStart(26, '0')
+                toBinaryString(address, 26)
     }
+}
+
+fun toBinaryString(value: Int, bits: Int): String {
+    return String.format("%${bits}s", Integer.toBinaryString(value and ((1 shl bits) - 1))).replace(' ', '0')
 }
 
 
